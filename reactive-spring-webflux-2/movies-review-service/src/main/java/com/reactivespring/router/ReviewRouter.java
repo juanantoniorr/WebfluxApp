@@ -18,7 +18,8 @@ public class ReviewRouter {
                     builder.GET("/helloworld", (request -> ServerResponse.ok().bodyValue("Hello world")))
                             .GET("",request -> reviewHandler.getAllReviews())
                             .POST("", request -> reviewHandler.addReview(request))
-                            .PUT("/{id}", request -> reviewHandler.update(request));
+                            .PUT("/{id}", request -> reviewHandler.update(request))
+                            .DELETE("/{id}", request -> reviewHandler.delete(request));
 
                 })
 

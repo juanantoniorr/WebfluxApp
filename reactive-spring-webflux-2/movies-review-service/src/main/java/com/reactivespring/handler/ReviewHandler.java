@@ -45,5 +45,13 @@ public class ReviewHandler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
+    public Mono<ServerResponse> delete(ServerRequest request) {
+        return Mono.from(reviewReactorRepository.findById(request.pathVariable("id")))
+                //Return a void so we are going to use then to create a response
+                .flatMap(review -> reviewReactorRepository.deleteById(request.pathVariable("id")))
+                .then(ServerResponse.noContent().build())
+                .switchIfEmpty(ServerResponse.notFound().build());
+
     }
+}
 
