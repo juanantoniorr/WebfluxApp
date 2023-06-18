@@ -4,6 +4,7 @@ import com.reactivespring.domain.Review;
 import com.reactivespring.repository.ReviewReactorRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -24,4 +25,25 @@ public class ReviewHandler {
         var reviewFlux = reviewReactorRepository.findAll();
         return ServerResponse.ok().body(reviewFlux, Review.class);
     }
-}
+
+    public Mono<ServerResponse> update(ServerRequest request) {
+
+        return Mono.from(reviewReactorRepository.findById(request.pathVariable("id")))
+                //Get Mono from result = review
+                //Notice we use map within flatMap
+                //All inside this flatMap
+                .flatMap(review -> request.bodyToMono(Review.class) //Transform request to mono, found mono didn't change
+                        //Start changing values from existingMono (review)
+                        //reqReview contains request already transformed in mono above
+                        .map(reqReview -> {
+                            review.setComment(reqReview.getComment());
+                            review.setRating(reqReview.getRating());
+                            return review;
+                        })
+                        .flatMap(reviewReactorRepository::save)
+                        .flatMap(updatedReview -> ServerResponse.ok().bodyValue(updatedReview)))
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    }
+
