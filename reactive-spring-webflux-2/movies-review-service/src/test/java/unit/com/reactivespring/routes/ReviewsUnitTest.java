@@ -1,6 +1,7 @@
 package com.reactivespring.routes;
 
 import com.reactivespring.domain.Review;
+import com.reactivespring.exception.handler.GlobalErrorHandler;
 import com.reactivespring.handler.ReviewHandler;
 import com.reactivespring.repository.ReviewReactorRepository;
 import com.reactivespring.router.ReviewRouter;
@@ -20,7 +21,7 @@ import java.util.Objects;
 @WebFluxTest
 //Inject this beans for this particular test class
 //Create this beans into spring container so we can use them in this class
-@ContextConfiguration(classes = {ReviewRouter.class, ReviewHandler.class})
+@ContextConfiguration(classes = {ReviewRouter.class, ReviewHandler.class, GlobalErrorHandler.class})
 @AutoConfigureWebTestClient
 public class ReviewsUnitTest {
 
@@ -49,5 +50,18 @@ public class ReviewsUnitTest {
                     assert Objects.nonNull(savedReview);
                     assert Objects.nonNull(savedReview.getReviewId());
                 });
+    }
+
+    @Test
+    void addReviewNullValidation() {
+        var review = new Review("1", null, "Awesome Movie", 9.0);
+
+        when(reviewReactorRepository.save(isA(Review.class))).thenReturn(Mono.just(review));
+        webTestClient.post()
+                .uri("/v1/review")
+                .bodyValue(review)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
     }
 }
