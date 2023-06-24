@@ -1,7 +1,6 @@
 package com.reactivespring.controller;
 
 import com.reactivespring.domain.MovieInfo;
-import com.reactivespring.repository.MovieInfoRepository;
 import com.reactivespring.service.MovieInfoService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,7 +39,11 @@ public class MoviesInfoController {
     }
 
     @GetMapping("/movieinfos/{id}")
-    public Mono<MovieInfo> getMovieInfoById(@PathVariable String id){
-        return movieInfoService.findById(id);
+    public Mono<ResponseEntity<MovieInfo>> getMovieInfoById(@PathVariable String id){
+
+        return movieInfoService.findById(id)
+                .map(movieInfo -> ResponseEntity.ok()
+                        .body(movieInfo))
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 }
