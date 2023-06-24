@@ -38,4 +38,9 @@ public class MoviesInfoController {
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
 
     }
+
+    @GetMapping("/movieinfos/{id}")
+    public Mono<MovieInfo> getMovieInfoById(@PathVariable String id){
+        return movieInfoService.findById(id);
+    }
 }

@@ -31,4 +31,9 @@ public class MovieInfoService {
                 });
 
     }
+
+    public Mono<MovieInfo> findById(String id) {
+        return movieInfoRepository.findById(id)
+                .switchIfEmpty(Mono.empty());
+    }
 }
