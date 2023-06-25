@@ -43,7 +43,7 @@ public class MoviesInfoRestClient {
 
                 if (clientResponse.statusCode().equals(HttpStatus.INTERNAL_SERVER_ERROR)){
                     return Mono.error(
-                            new MoviesInfoServerException("Server exception in MoviesInfoServer: " + clientResponse));
+                            new MoviesInfoServerException("Server exception in MoviesInfoServer"));
 
                 }
                 return clientResponse.bodyToMono(String.class)
