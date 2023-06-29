@@ -3,6 +3,7 @@ package com.reactivespring.client;
 import com.reactivespring.domain.MovieInfo;
 import com.reactivespring.exception.MoviesInfoClientException;
 import com.reactivespring.exception.MoviesInfoServerException;
+import com.reactivespring.util.RetryUtil;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor
@@ -36,7 +41,8 @@ public class MoviesInfoRestClient {
 
                 }
                 return clientResponse.bodyToMono(String.class)
-                        .flatMap(response -> Mono.error(new MoviesInfoClientException(response, clientResponse.statusCode().value())));
+                        .flatMap(response -> Mono.error(new MoviesInfoClientException(response,
+                                clientResponse.statusCode().value())));
             })
             .onStatus(HttpStatus::is5xxServerError, clientResponse -> {
                 log.info("Status code is: {} ", clientResponse.statusCode().value());
@@ -50,6 +56,7 @@ public class MoviesInfoRestClient {
                         .flatMap(response -> Mono.error(new MoviesInfoServerException(response)));
             })
             .bodyToMono(MovieInfo.class)
+            .retryWhen(RetryUtil.retry())
             .log();
 
     }

@@ -1,6 +1,7 @@
 package com.reactivespring.client;
 
 import com.reactivespring.domain.Review;
+import com.reactivespring.util.RetryUtil;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,8 @@ public class MoviesReviewRestClient {
         return webClient.get()
                         .uri(UriComponentsBuilder.fromHttpUrl(reviewsUrl)
                                 .queryParam("movieInfoId", movieId)
-                                .buildAndExpand().toUriString()).retrieve().bodyToFlux(Review.class);
+                                .buildAndExpand().toUriString()).retrieve().bodyToFlux(Review.class)
+                .retryWhen(RetryUtil.retry());
 
 
     }
