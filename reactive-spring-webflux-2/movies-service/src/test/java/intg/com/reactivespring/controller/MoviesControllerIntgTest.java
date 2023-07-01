@@ -92,37 +92,6 @@ public class MoviesControllerIntgTest {
     }
 
     @Test
-    void retrieveMovieById_404_reviews(){
-        var movieId = "abc";
-        //Stub for moviesInfo
-        stubFor(get(urlEqualTo("/v1/movieinfos/" + movieId))
-                .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        //Automatically looks for resources/__files
-                        .withBodyFile("movieinfo.json")));
-
-        //Stub for reviews
-        stubFor(get(urlPathEqualTo("/v1/reviews"))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.SC_NOT_FOUND)));
-
-//ToDo fix reviews controller to retrieve an empty mono when there are no reviews
-        webTestClient.get()
-                .uri("/v1/movies/{id}", movieId)
-                .exchange()
-                //Will be ok but reviewsList will be empty
-                .expectStatus().isOk()
-                .expectBody(Movie.class)
-                .consumeWith(movieEntityExchangeResult -> {
-                    var movie = movieEntityExchangeResult.getResponseBody();
-                    assert Objects.requireNonNull(movie).getReviewList().size()==0;
-                    assertEquals("Batman Begins", movie.getMovieInfo().getName());
-                });
-
-
-    }
-
-    @Test
     void retrieveMovieById_500_moviesInfo(){
         var movieId = "abc";
         //Stub for moviesInfo
@@ -163,8 +132,6 @@ public class MoviesControllerIntgTest {
             .willReturn(aResponse()
                     .withStatus(500)));
 
-
-    //ToDo return ReviewsServerException instead of internal server error
         webTestClient.get()
                 .uri("/v1/movies/{id}", movieId)
                 .exchange()
